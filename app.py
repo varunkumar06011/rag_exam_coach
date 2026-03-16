@@ -155,7 +155,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ── Header ──
-st.title("Finish Task – Smart Study Assistant (UPDATED)")
+st.title("Finish Task – Smart Study Assistant")
 st.markdown("##### Transform your syllabus into practice exams instantly.")
 st.write("") # Spacer
 
