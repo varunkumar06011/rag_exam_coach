@@ -38,6 +38,7 @@ def generate_questions(
     num_questions: int,
     api_key: str,
     topic: str = None,
+    model: str = "llama-3.1-8b-instant",
 ) -> str:
     """
     Generate exam questions from document chunks using Groq LLM.
@@ -80,7 +81,7 @@ Generate {num_questions} well-structured exam questions now."""
 
     try:
         response = client.chat.completions.create(
-            model="llama-3.1-8b-instant",
+            model=model,
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt}
@@ -91,4 +92,14 @@ Generate {num_questions} well-structured exam questions now."""
         return response.choices[0].message.content
 
     except Exception as e:
-        return f"⚠️ Error generating questions: {str(e)}\n\nPlease check your Groq API key and try again."
+        error_msg = str(e)
+        if "organization_restricted" in error_msg:
+            return (
+                "⚠️ **Groq API Access Restricted**: The current API key belongs to an organization that is restricted. "
+                "This often happens if the account is under review or has billing issues.\n\n"
+                "**How to fix:**\n"
+                "1. Go to [Groq Console](https://console.groq.com/keys) and generate your own API key.\n"
+                "2. Paste it into the 'Override Groq API Key' box in the sidebar.\n"
+                "3. Try generating questions again."
+            )
+        return f"⚠️ Error generating questions: {error_msg}\n\nPlease check your Groq API key and try again."

@@ -118,18 +118,17 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Try to get API key from Streamlit secrets (Cloud) or Environment Variables (Local/.env)
+# 1. Base API Key from Environment
 try:
-    # Check if the secrets file exists first so Streamlit doesn't auto-warn
     if os.path.exists(".streamlit/secrets.toml"):
-        # The key might be under a [secret] block or at the root level depending on the TOML format
         if "secret" in st.secrets:
-            GROQ_API_KEY = st.secrets["secret"].get("GROQ_API_KEY")
+            BASE_GROQ_API_KEY = st.secrets["secret"].get("GROQ_API_KEY")
         else:
-            GROQ_API_KEY = st.secrets.get("GROQ_API_KEY")
+            BASE_GROQ_API_KEY = st.secrets.get("GROQ_API_KEY")
     else:
-        GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
+        BASE_GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
 except Exception:
-    GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
+    BASE_GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
 
 # ── Session State Init ──
 if "vectorstore" not in st.session_state:
@@ -156,7 +155,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ── Header ──
-st.title("Finish Task – Smart Study Assistant")
+st.title("Finish Task – Smart Study Assistant (UPDATED)")
 st.markdown("##### Transform your syllabus into practice exams instantly.")
 st.write("") # Spacer
 
@@ -168,6 +167,25 @@ with st.sidebar:
     language = st.selectbox("Output Language", ["English", "Telugu"])
     difficulty = st.selectbox("Difficulty Level", ["Easy", "Medium", "Hard"])
     num_questions = st.slider("Number of Questions", min_value=3, max_value=15, value=5)
+    
+    st.divider()
+    st.subheader("🔑 API Configuration")
+    custom_key = st.text_input(
+        "Override Groq API Key", 
+        type="password", 
+        placeholder="gsk_...",
+        help="Paste your own Groq API key here if the default one is restricted."
+    )
+    
+    # Final API Key priority: Manual Input > Environment Variable
+    GROQ_API_KEY = custom_key if custom_key else BASE_GROQ_API_KEY
+    
+    selected_model = st.selectbox(
+        "Select Model",
+        ["llama-3.1-8b-instant", "llama-3.1-70b-versatile", "llama3-8b-8192", "mixtral-8x7b-32768"],
+        index=0,
+        help="Try a different model if one is restricted."
+    )
     
     st.divider()
     
@@ -239,7 +257,8 @@ with st.container():
                     language=language,
                     num_questions=num_questions,
                     api_key=GROQ_API_KEY,
-                    topic=topic_input
+                    topic=topic_input,
+                    model=selected_model
                 )
 
                 # Track topic
