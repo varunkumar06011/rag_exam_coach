@@ -28,6 +28,9 @@ def load_api_key():
 
 GROQ_API_KEY = load_api_key()
 
+# Fixed model (no UI selection)
+MODEL_NAME = "llama-3.1-8b-instant"
+
 # ------------------------------
 # Session State
 # ------------------------------
@@ -52,6 +55,7 @@ if "doc_name" not in st.session_state:
 st.title("🎓 Finish Task – Smart Study Assistant")
 st.markdown("Transform your syllabus into practice exams instantly.")
 
+
 # ------------------------------
 # Sidebar
 # ------------------------------
@@ -75,16 +79,6 @@ with st.sidebar:
         3,
         15,
         5
-    )
-
-    selected_model = st.selectbox(
-        "Select Model",
-        [
-            "llama-3.1-8b-instant",
-            "llama-3.1-70b-versatile",
-            "llama3-8b-8192",
-            "mixtral-8x7b-32768"
-        ]
     )
 
     st.divider()
@@ -178,7 +172,7 @@ if st.session_state.vectorstore and GROQ_API_KEY:
                 num_questions=num_questions,
                 api_key=GROQ_API_KEY,
                 topic=topic_input,
-                model=selected_model
+                model=MODEL_NAME
             )
 
             if topic_input:
